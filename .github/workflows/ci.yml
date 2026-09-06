@@ -38,7 +38,7 @@ jobs:
             '*/docs/indicators.md' \
             '*/docs/input-data.md' \
             '*/docs/metrics.md' \
-            '*/examples/input-template.csv'
+            '*/examples/input-format-template.csv'
       - name: Smoke test installed wheel
         run: |
           wheel_path=$(find dist -maxdepth 1 -type f -name '*.whl' -print -quit)
