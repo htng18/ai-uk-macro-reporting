@@ -1,0 +1,69 @@
+[project]
+name = "ai-uk-macro-reporting"
+version = "0.1.0"
+description = "A LangGraph pipeline for structured monthly UK macroeconomic reporting."
+authors = [
+    { name = "H.T. Ng" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+requires-python = ">=3.13"
+keywords = [
+    "economics",
+    "langgraph",
+    "macroeconomics",
+    "reporting",
+    "united-kingdom",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "jinja2>=3.1.6",
+    "langchain-core>=1.6.0",
+    "langchain-openai>=1.6.0",
+    "langgraph>=1.2.11",
+    "pandas>=3.0.5",
+    "pydantic>=2.13.4",
+    "python-dotenv>=1.2.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/htng18/ai-uk-macro-reporting"
+Repository = "https://github.com/htng18/ai-uk-macro-reporting"
+Issues = "https://github.com/htng18/ai-uk-macro-reporting/issues"
+
+[project.scripts]
+uk-macro-report = "ai_uk_macro_reporting.cli:main"
+
+[project.optional-dependencies]
+pdf = [
+    "weasyprint>=69.0",
+]
+
+[build-system]
+requires = ["uv_build==0.9.26"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.4",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.uv.build-backend]
+source-include = ["docs/**", "examples/**"]
+source-exclude = ["src/**/.ruff_cache", "src/**/.ruff_cache/**"]

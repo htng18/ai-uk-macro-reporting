@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          version: "0.9.26"
+      - name: Install Python
+        run: uv python install 3.13
+      - name: Install dependencies
+        run: uv sync --frozen --dev --extra pdf
+      - name: Lint
+        run: uv run ruff check .
+      - name: Check formatting
+        run: uv run ruff format --check .
+      - name: Test
+        run: uv run pytest -q
+      - name: Verify PDF dependency
+        run: uv run python -c "import weasyprint"
+      - name: Build distributions
+        run: uv build
+      - name: Verify source distribution documentation
+        run: |
+          sdist_path=$(find dist -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+          test -n "$sdist_path"
+          tar -tzf "$sdist_path" --wildcards \
+            '*/docs/indicators.md' \
+            '*/docs/input-data.md' \
+            '*/docs/metrics.md' \
+            '*/examples/input-template.csv'
+      - name: Smoke test installed wheel
+        run: |
+          wheel_path=$(find dist -maxdepth 1 -type f -name '*.whl' -print -quit)
+          test -n "$wheel_path"
+          smoke_env="$RUNNER_TEMP/ai-uk-macro-wheel-smoke"
+          uv venv "$smoke_env" --python 3.13
+          uv pip install --python "$smoke_env/bin/python" "${wheel_path}[pdf]"
+          cd "$RUNNER_TEMP"
+          "$smoke_env/bin/uk-macro-report" --help
+          "$smoke_env/bin/python" -c "import weasyprint; from ai_uk_macro_reporting.presentation.render_report import TEMPLATE_DIRECTORY; assert (TEMPLATE_DIRECTORY / 'monthly_report.html.j2').is_file()"

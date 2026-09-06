@@ -1,0 +1,1 @@
+"""Deterministic macroeconomic metric calculations."""

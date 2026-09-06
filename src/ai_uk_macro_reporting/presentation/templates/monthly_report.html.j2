@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UK Monthly Economic Report — {{ report.reporting_period }}</title>
+  <style>
+    :root { color-scheme: light; --ink: #172033; --muted: #5b6474; --rule: #d9dee8; --accent: #173f73; --paper: #fff; }
+    @page { size: A4; margin: 18mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 980px; padding: 40px; color: var(--ink); background: var(--paper); font: 16px/1.55 Arial, sans-serif; }
+    h1, h2, h3 { color: var(--accent); line-height: 1.2; page-break-after: avoid; }
+    h1 { margin-bottom: 4px; font-size: 2.2rem; }
+    h2 { margin-top: 2rem; padding-bottom: .35rem; border-bottom: 1px solid var(--rule); }
+    h3 { margin-bottom: .35rem; font-size: 1.05rem; }
+    p { margin: .45rem 0 1rem; }
+    ul { margin-top: .4rem; }
+    .period, .label { color: var(--muted); }
+    .summary { padding: 1.2rem 1.4rem; border-left: 5px solid var(--accent); background: #f4f7fb; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--rule); border-radius: 6px; break-inside: avoid; }
+    .card p:last-child { margin-bottom: 0; }
+    .tag { display: inline-block; margin: 0 .35rem .4rem 0; padding: .2rem .55rem; border-radius: 999px; color: #fff; background: var(--accent); font-size: .85rem; }
+    .watch-item, .risk-item { break-inside: avoid; }
+    @media (max-width: 700px) { body { padding: 20px; } .grid { grid-template-columns: 1fr; } }
+    @media print {
+      body { max-width: none; padding: 0; }
+      .grid { display: block; }
+      .card { margin-bottom: 1rem; }
+      .card, .watch-item, .risk-item { break-inside: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>UK Monthly Economic Report</h1>
+    <p class="period">Reporting period: {{ report.reporting_period }}</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Executive summary</h2>
+      <div class="summary">
+        <span class="tag">{{ report.executive_summary.macro_regime | humanise }}</span>
+        <span class="tag">{{ report.executive_summary.confidence | humanise }} confidence</span>
+        <p>{{ report.executive_summary.summary }}</p>
+        <p><strong>Central outlook:</strong> {{ report.executive_summary.central_outlook }}</p>
+        <p><strong>Main qualification:</strong> {{ report.executive_summary.main_qualification }}</p>
+        <p><strong>Confidence:</strong> {{ report.executive_summary.confidence_explanation }}</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Current conditions</h2>
+      <div class="grid">
+        {% for title, section in [
+          ('Output and demand', report.current_conditions.output_and_demand),
+          ('Inflation', report.current_conditions.inflation),
+          ('Labour market', report.current_conditions.labour_market),
+          ('Monetary and financial conditions', report.current_conditions.monetary_and_financial_conditions)
+        ] %}
+        <article class="card">
+          <h3>{{ title }}</h3>
+          <p class="label">{{ (section.direction if section.direction is defined else section.classification) | humanise }}</p>
+          <p>{{ section.assessment }}</p>
+          <p><strong>Qualification:</strong> {{ section.key_qualification }}</p>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section>
+      <h2>Cross-theme assessment</h2>
+      <p>{{ report.cross_theme_assessment.assessment }}</p>
+      <ul>{% for relationship in report.cross_theme_assessment.key_relationships %}<li>{{ relationship }}</li>{% endfor %}</ul>
+      <p><strong>Regime interpretation:</strong> {{ report.cross_theme_assessment.regime_interpretation }}</p>
+    </section>
+
+    <section>
+      <h2>Risks to the central interpretation</h2>
+      <p><span class="tag">{{ report.risks_to_central_interpretation.counter_analysis_verdict | humanise }}</span></p>
+      <p>{{ report.risks_to_central_interpretation.assessment }}</p>
+      {% for item in report.risks_to_central_interpretation.key_risks %}
+      <div class="risk-item"><h3>{{ item.risk }}</h3><p>{{ item.significance }}</p></div>
+      {% endfor %}
+      <p><strong>Strongest counter-case:</strong> {{ report.risks_to_central_interpretation.strongest_counter_case }}</p>
+    </section>
+
+    <section>
+      <h2>Conditional outlook</h2>
+      <p class="period">Horizon: {{ report.conditional_outlook.horizon }}</p>
+      <div class="grid">
+        {% for scenario in report.conditional_outlook.scenarios %}
+        <article class="card">
+          <span class="tag">{{ scenario.scenario_type | humanise }}</span>
+          <h3>{{ scenario.title }}</h3>
+          <p>{{ scenario.outlook }}</p>
+          <p><strong>Confirmation to watch</strong></p>
+          <ul>{% for item in scenario.confirmation_to_watch %}<li>{{ item }}</li>{% endfor %}</ul>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section>
+      <h2>What to watch</h2>
+      {% for item in report.what_to_watch %}
+      <article class="watch-item">
+        <h3>{{ item.indicator }}</h3>
+        <p>{{ item.development_to_watch }}</p>
+        <p><strong>Why it matters:</strong> {{ item.significance }}</p>
+      </article>
+      {% endfor %}
+    </section>
+
+    <section>
+      <h2>Overall assessment</h2>
+      <p><span class="tag">{{ report.overall_assessment.confidence | humanise }} confidence</span></p>
+      <p>{{ report.overall_assessment.assessment }}</p>
+      <p><strong>Main uncertainties</strong></p>
+      <ul>{% for uncertainty in report.overall_assessment.main_uncertainties %}<li>{{ uncertainty }}</li>{% endfor %}</ul>
+    </section>
+  </main>
+</body>
+</html>
